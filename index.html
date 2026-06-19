@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FRAME — ホームページ制作</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* ============ THEME TOKENS — 配色はここだけ変えれば全体に反映 ============ */
+  :root{
+    --paper:#D9DEE6; --paper2:#D0D6DF; --card:#FAFBFD;
+    --ink:#14161B; --muted:#565D69; --line:#C5CBD6;
+    --pine:#0B7A63; --pine-d:#0A6353; --pine-soft:#DCEAE6;   /* emerald — primary accent */
+    --teal:#10B3AE; --indigo:#5E78FF; --blush:#FF8E78;       /* aurora stops (stronger) */
+    --amber:#F08A5D; --amber-d:#E0764A; --amber-soft:#F7E6DE; /* warm coral accent */
+    --r:16px; --maxw:1080px;
+    --disp:"Geist","Noto Sans JP","Hiragino Kaku Gothic ProN",sans-serif;
+    --body:"Noto Sans JP","Geist","Hiragino Kaku Gothic ProN",sans-serif;
+    --num:"Geist","Outfit",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{font-family:var(--body);background:linear-gradient(180deg,#E3E7ED 0%,#D6DBE3 46%,#CAD0DA 100%);background-attachment:fixed;color:var(--ink);line-height:1.8;-webkit-font-smoothing:antialiased;font-size:15px;}
+  .grain{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:.045;mix-blend-mode:multiply;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:180px 180px;}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px;}
+  .eyebrow{font-family:var(--num);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--pine);font-weight:600;display:inline-block;margin-bottom:14px;}
+  h2{font-family:var(--disp);font-weight:600;font-size:clamp(25px,3.6vw,36px);line-height:1.32;letter-spacing:-.012em;}
+  h3{font-family:var(--disp);font-weight:600;font-size:18px;letter-spacing:-.005em;}
+  .lead{color:var(--muted);font-size:16px;}
+
+  .btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--disp);font-weight:600;font-size:15px;padding:14px 26px;border-radius:12px;cursor:pointer;border:none;transition:transform .18s ease,box-shadow .18s ease,filter .18s ease;}
+  .btn-primary{background:linear-gradient(135deg,var(--pine),var(--teal));color:#fff;box-shadow:0 8px 24px rgba(12,124,102,.26);}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(12,124,102,.34);filter:brightness(1.06);}
+  .btn-ghost{background:transparent;color:var(--pine);border:1.5px solid var(--pine);}
+  .btn-ghost:hover{background:var(--pine-soft);}
+  .btn-arrow::after{content:"→";font-family:var(--num);}
+
+  header{position:sticky;top:0;z-index:50;background:rgba(223,227,234,.78);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:68px;}
+  .brand{font-family:var(--num);font-weight:700;font-size:21px;letter-spacing:.14em;color:var(--ink);display:flex;align-items:center;gap:9px;}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--amber);display:inline-block;}
+  .navlinks{display:flex;gap:26px;align-items:center;}
+  .navlinks a{font-size:14px;color:var(--muted);font-weight:500;transition:color .15s;}
+  .navlinks a:hover{color:var(--ink);}
+  .nav .btn{padding:10px 20px;font-size:14px;}
+  .menu-toggle{display:none;background:none;border:none;font-size:24px;cursor:pointer;color:var(--ink);}
+
+  /* hero */
+  .hero{position:relative;overflow:hidden;padding:84px 0 72px;}
+  .hero-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center;}
+  .hero h1{font-family:var(--disp);font-weight:600;font-size:clamp(33px,5.6vw,58px);line-height:1.26;letter-spacing:-.02em;}
+  .hero h1 .hl{position:relative;white-space:nowrap;background:linear-gradient(100deg,var(--teal),var(--indigo) 52%,var(--blush));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .hero h1 .hl::after{content:"";position:absolute;left:0;right:0;bottom:-.02em;height:.14em;background:linear-gradient(90deg,var(--teal),var(--indigo),var(--blush));opacity:.45;z-index:-1;border-radius:3px;}
+  .hero .sub{margin:22px 0 30px;font-size:17px;color:var(--muted);max-width:34ch;}
+  .hero-cta{display:flex;gap:14px;flex-wrap:wrap;}
+  .hero-trust{margin-top:26px;display:flex;gap:22px;flex-wrap:wrap;font-size:13px;color:var(--muted);}
+  .hero-trust span{display:flex;align-items:center;gap:7px;}
+  .hero-trust .ck{color:var(--pine);font-weight:700;}
+  .pricecard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:26px;box-shadow:0 24px 60px rgba(31,94,84,.10);}
+  .pricecard .tag{font-family:var(--num);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--pine);font-weight:600;}
+  .pricecard .big{font-family:var(--num);font-weight:700;font-size:54px;color:var(--ink);line-height:1;margin:8px 0 2px;display:flex;align-items:baseline;gap:4px;}
+  .pricecard .big .yen{font-size:24px;}
+  .pricecard .big .from{font-size:15px;color:var(--muted);font-weight:500;font-family:var(--body);}
+  .pricecard ul{list-style:none;margin:18px 0 0;display:grid;gap:10px;}
+  .pricecard li{display:flex;gap:10px;font-size:14px;color:var(--ink);}
+  .pricecard li::before{content:"✓";color:var(--pine);font-weight:800;}
+
+  /* hero motion — aurora mesh signature + load bloom */
+  .hero-bg{position:absolute;inset:0;z-index:-1;overflow:hidden;}
+  .hero-bg .aur{position:absolute;border-radius:50%;filter:blur(66px);will-change:transform;}
+  .hero-bg .a1{width:600px;height:600px;background:radial-gradient(circle,var(--teal),transparent 64%);opacity:.58;top:-170px;left:-90px;animation:bloom 1.3s ease both, drift1 19s ease-in-out 1.3s infinite;}
+  .hero-bg .a2{width:500px;height:500px;background:radial-gradient(circle,var(--indigo),transparent 64%);opacity:.46;top:-70px;right:2%;animation:bloom 1.3s ease .12s both, drift2 22s ease-in-out 1.42s infinite;}
+  .hero-bg .a3{width:430px;height:430px;background:radial-gradient(circle,var(--blush),transparent 64%);opacity:.48;bottom:-150px;left:32%;animation:bloom 1.3s ease .24s both, drift1 25s ease-in-out 1.54s infinite reverse;}
+  @keyframes bloom{from{opacity:0;transform:scale(.82)}to{}}
+  @keyframes drift1{0%,100%{transform:translate(0,0)}50%{transform:translate(42px,30px)}}
+  @keyframes drift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-34px,-24px)}}
+  .hero h1,.hero .sub,.hero .hero-cta,.hero .hero-trust{opacity:0;animation:heroUp .7s cubic-bezier(.2,.7,.2,1) forwards;}
+  .hero h1{animation-delay:.16s;} .hero .sub{animation-delay:.30s;} .hero .hero-cta{animation-delay:.42s;} .hero .hero-trust{animation-delay:.54s;}
+  @keyframes heroUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+  section{padding:78px 0;}
+  .section-head{max-width:60ch;margin-bottom:40px;}
+  .section-head .lead{margin-top:12px;}
+  .alt{background:var(--paper2);}
+
+  .cards3{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
+  .cards3.why{grid-template-columns:repeat(3,1fr);}
+  .ucard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px;}
+  .ucard .ic{width:42px;height:42px;border-radius:11px;background:var(--pine-soft);display:flex;align-items:center;justify-content:center;font-size:21px;margin-bottom:14px;}
+  .ucard h3{margin-bottom:7px;font-size:16px;}
+  .ucard p{font-size:13.5px;color:var(--muted);line-height:1.7;}
+
+  /* estimator + live preview */
+  .est{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;}
+  .opt-list{display:grid;gap:12px;}
+  .opt{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:15px 18px;cursor:pointer;transition:border-color .15s,background .15s;}
+  .opt:hover{border-color:var(--pine);}
+  .opt.on{border-color:var(--pine);background:var(--pine-soft);}
+  .opt.base{cursor:default;border-style:dashed;}
+  .opt .l{display:flex;align-items:center;gap:13px;}
+  .opt .cbx{width:22px;height:22px;border-radius:7px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;flex:0 0 auto;color:#fff;font-size:13px;font-weight:800;transition:.15s;}
+  .opt.on .cbx,.opt.base .cbx{background:var(--pine);border-color:var(--pine);}
+  .opt .nm{font-weight:500;font-size:14.5px;}
+  .opt .desc{font-size:12px;color:var(--muted);}
+  .opt .pr{font-family:var(--num);font-weight:600;font-size:15px;color:var(--ink);white-space:nowrap;}
+  .est-right{display:grid;gap:18px;position:sticky;top:86px;align-self:start;}
+  .est-right{isolation:isolate;}
+  .est-right::before{content:"";position:absolute;inset:-26px -10px 30% -10px;z-index:-1;border-radius:30px;
+    background:radial-gradient(60% 70% at 30% 20%,rgba(14,142,146,.20),transparent 70%),radial-gradient(60% 70% at 80% 10%,rgba(91,115,232,.18),transparent 70%);
+    filter:blur(34px);}
+
+  /* preview device — 高精細・各オプションの効果が一目で分かる */
+  .pv{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 18px 44px rgba(31,94,84,.13);}
+  .pv-bar{display:flex;align-items:center;gap:6px;padding:10px 13px;background:var(--paper2);border-bottom:1px solid var(--line);}
+  .pv-bar .d{width:9px;height:9px;border-radius:50%;background:#d9d4c7;}
+  .pv-url{margin-left:6px;font-size:10.5px;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:6px;padding:4px 11px;flex:1;font-family:var(--num);}
+  .pv-screen{padding:16px;min-height:380px;background:#fff;}
+  /* nav */
+  .pv-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;}
+  .pv-logo{display:flex;align-items:center;gap:6px;font-family:var(--disp);font-weight:800;font-size:14px;color:var(--ink);transition:.2s;}
+  .pv-logo .mk{display:none;}
+  .pv.has-logo .pv-logo{background:linear-gradient(135deg,var(--pine),#2c7d70);color:#fff;padding:5px 10px;border-radius:8px;letter-spacing:.03em;box-shadow:0 4px 12px rgba(31,94,84,.25);}
+  .pv.has-logo .pv-logo .mk{display:inline-flex;width:14px;height:14px;border-radius:4px;background:var(--amber);align-items:center;justify-content:center;font-size:9px;color:#fff;}
+  .pv-menu{display:flex;gap:11px;font-size:10px;color:var(--muted);align-items:center;font-weight:500;}
+  .pv-menu .en{display:none;} .pv.has-lang .pv-menu .jp{display:none;} .pv.has-lang .pv-menu .en{display:inline;}
+  .pv-extra{display:none;} .pv.has-pages .pv-extra{display:inline;}
+  .pv-right{display:flex;align-items:center;gap:8px;}
+  .pv-cart{display:none;align-items:center;gap:3px;font-size:10px;color:var(--ink);font-weight:600;}
+  .pv-cart .cnt{background:var(--amber);color:#fff;border-radius:99px;font-size:8px;padding:0 5px;font-family:var(--num);}
+  .pv.has-ec .pv-cart{display:inline-flex;}
+  .pv-lang{display:none;font-size:9px;font-family:var(--num);border:1px solid var(--line);border-radius:99px;overflow:hidden;}
+  .pv-lang b{padding:2px 7px;display:inline-block;}
+  .pv-lang .on{background:var(--pine);color:#fff;}
+  .pv.has-lang .pv-lang{display:inline-flex;}
+  /* hero */
+  .pv-hero{border-radius:11px;overflow:hidden;position:relative;height:128px;background:linear-gradient(135deg,#234f48,#2c7d70);display:flex;align-items:center;}
+  .pv-hero .htxt{position:relative;z-index:3;padding:0 16px;color:#fff;}
+  .pv-hero .htxt .h{font-family:var(--disp);font-weight:800;font-size:17px;line-height:1.3;}
+  .pv-hero .htxt .s{font-size:9.5px;opacity:.85;margin-top:3px;}
+  .pv-hero .htxt .b{display:inline-block;margin-top:9px;background:var(--amber);color:#1a1c1f;font-family:var(--disp);font-weight:700;font-size:9.5px;padding:5px 11px;border-radius:7px;}
+  .pv-hero .img-dots{position:absolute;right:0;top:0;bottom:0;width:42%;background:radial-gradient(circle at 60% 40%,rgba(255,255,255,.22),transparent 60%);}
+  /* 3D scene (clearly animated) */
+  .pv-3d{display:none;position:absolute;right:14px;top:50%;transform:translateY(-50%);width:74px;height:74px;z-index:2;perspective:300px;}
+  .pv.has-3d .pv-3d{display:block;}
+  .pv-3d .cube{position:relative;width:100%;height:100%;transform-style:preserve-3d;animation:pvspin 7s linear infinite;}
+  .pv-3d .cube i{position:absolute;width:74px;height:74px;border:1.5px solid rgba(255,255,255,.85);background:rgba(255,255,255,.06);box-shadow:0 0 16px rgba(255,255,255,.3);}
+  .pv-3d .cube i:nth-child(1){transform:translateZ(37px)} .pv-3d .cube i:nth-child(2){transform:rotateY(180deg) translateZ(37px)}
+  .pv-3d .cube i:nth-child(3){transform:rotateY(90deg) translateZ(37px)} .pv-3d .cube i:nth-child(4){transform:rotateY(-90deg) translateZ(37px)}
+  .pv-3d .cube i:nth-child(5){transform:rotateX(90deg) translateZ(37px)} .pv-3d .cube i:nth-child(6){transform:rotateX(-90deg) translateZ(37px)}
+  @keyframes pvspin{from{transform:rotateX(-18deg) rotateY(0)}to{transform:rotateX(-18deg) rotateY(360deg)}}
+  .pv-badge{display:none;position:absolute;left:14px;bottom:12px;z-index:4;font-family:var(--num);font-size:8px;letter-spacing:.1em;background:rgba(0,0,0,.4);color:#fff;padding:2px 7px;border-radius:99px;}
+  .pv.has-3d .pv-badge{display:inline-block;}
+  /* added blocks share a pop-in */
+  .pv-block{display:none;margin-top:12px;}
+  @keyframes popin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  /* booking module */
+  .pv.has-booking .pv-booking{display:block;animation:popin .35s ease;}
+  .pv-booking .ttl{font-family:var(--disp);font-weight:700;font-size:11px;color:var(--ink);margin-bottom:7px;display:flex;align-items:center;gap:5px;}
+  .pv-booking .ttl::before{content:"📅";}
+  .pv-booking .dates{display:flex;gap:5px;margin-bottom:7px;}
+  .pv-booking .dates span{flex:1;text-align:center;font-size:9px;padding:5px 0;border:1px solid var(--line);border-radius:6px;color:var(--muted);}
+  .pv-booking .dates span.sel{background:var(--pine);color:#fff;border-color:var(--pine);}
+  .pv-booking .slots{display:flex;gap:5px;}
+  .pv-booking .slots span{font-size:9px;padding:5px 9px;border:1px solid var(--line);border-radius:6px;color:var(--ink);}
+  .pv-booking .slots span.x{color:#c9c4ba;text-decoration:line-through;}
+  .pv-booking .bk{margin-top:8px;background:var(--amber);color:#1a1c1f;text-align:center;font-family:var(--disp);font-weight:700;font-size:10px;padding:7px;border-radius:7px;}
+  /* shop module */
+  .pv.has-ec .pv-shop{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;animation:popin .35s ease;}
+  .pv-shop .it .ph{aspect-ratio:1;border-radius:7px;background:linear-gradient(135deg,var(--paper2),#e6e0d2);}
+  .pv-shop .it .nm{font-size:8.5px;color:var(--ink);margin-top:4px;}
+  .pv-shop .it .pr{font-size:9px;font-weight:700;color:var(--ink);font-family:var(--num);}
+  .pv-shop .it .add{margin-top:3px;font-size:7.5px;text-align:center;border:1px solid var(--pine);color:var(--pine);border-radius:5px;padding:3px;}
+  /* gallery (pages) */
+  .pv.has-pages .pv-gallery{display:block;animation:popin .35s ease;}
+  .pv-gallery .ttl{font-family:var(--disp);font-weight:700;font-size:11px;color:var(--ink);margin-bottom:6px;}
+  .pv-gallery .row{display:flex;gap:6px;}
+  .pv-gallery .row span{flex:1;height:38px;border-radius:6px;background:linear-gradient(135deg,#e9f0ed,#d7e6e0);}
+  /* footer lines */
+  .pv-foot{margin-top:13px;display:flex;gap:6px;}
+  .pv-foot .ln{height:7px;border-radius:4px;background:var(--paper2);flex:1;}
+  .pv-foot .ln.s{flex:.5;}
+
+  .est-total{background:var(--ink);color:#fff;border-radius:var(--r);padding:24px;}
+  .est-total .row{display:flex;justify-content:space-between;align-items:baseline;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.12);font-size:14px;}
+  .est-total .row span:first-child{color:#b9bcc0;}
+  .est-total .grand{padding-top:14px;border:none;}
+  .est-total .big{display:flex;align-items:baseline;gap:3px;}
+  .est-total .big .n{font-family:var(--num);font-weight:700;font-size:40px;color:var(--amber);line-height:1;}
+  .est-total .big .yen{font-size:18px;color:var(--amber);font-family:var(--num);font-weight:700;}
+  .est-total .btn{width:100%;justify-content:center;margin-top:18px;}
+  .est-note{font-size:11.5px;color:#9a9da2;margin-top:13px;line-height:1.6;}
+
+  /* portfolio carousel — 手動操作（矢印・ドラッグ・スクロール）＋自動送り（操作で停止） */
+  .carousel{position:relative;}
+  .track{display:flex;gap:22px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;padding:6px 28px 8px;scrollbar-width:none;-ms-overflow-style:none;cursor:grab;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 3.5%,#000 96.5%,transparent);mask-image:linear-gradient(90deg,transparent,#000 3.5%,#000 96.5%,transparent);}
+  .track::-webkit-scrollbar{display:none;}
+  .track.dragging{cursor:grabbing;scroll-behavior:auto;scroll-snap-type:none;}
+  .car-btn{position:absolute;top:46%;transform:translateY(-50%);z-index:12;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.94);backdrop-filter:blur(6px);box-shadow:0 8px 22px rgba(31,94,84,.16);cursor:pointer;font-size:22px;line-height:1;color:var(--ink);display:flex;align-items:center;justify-content:center;transition:.2s;}
+  .car-btn:hover{background:var(--pine);color:#fff;border-color:var(--pine);}
+  .car-btn.prev{left:6px;} .car-btn.next{right:6px;}
+  .pcard{width:320px;flex:0 0 auto;scroll-snap-align:start;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);background:var(--card);transition:transform .25s ease,box-shadow .25s ease;}
+  .pcard:hover{transform:translateY(-6px);box-shadow:0 22px 44px rgba(31,94,84,.14);}
+  .pcard .thumb{height:172px;position:relative;overflow:hidden;border-bottom:1px solid var(--line);}
+  .demo-pill{position:absolute;top:10px;right:10px;z-index:5;font-family:var(--num);font-size:9px;letter-spacing:.14em;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:99px;}
+  .tn{position:absolute;inset:0;padding:11px 13px;}
+  .tn .bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;}
+  .tn .lg{font-size:11px;font-weight:700;}
+  .tn .nv{display:flex;gap:6px;font-size:6.5px;opacity:.7;align-items:center;}
+  .tn h4{line-height:1.25;}
+  .tn-salon{background:#FAF7F2;color:#2E2A26;font-family:Georgia,serif;}
+  .tn-salon .lg{letter-spacing:.1em;font-weight:400;font-size:12px;}
+  .tn-salon h4{font-size:18px;font-weight:400;margin-top:14px;}
+  .tn-salon .pill{display:inline-block;margin-top:10px;background:#2E2A26;color:#fff;font-size:8px;padding:4px 10px;border-radius:99px;font-family:var(--body);}
+  .tn-salon .sg{width:7px;height:7px;border-radius:50%;background:#9CAF88;display:inline-block;}
+  .tn-gym{background:#0F1115;color:#fff;font-family:system-ui,sans-serif;}
+  .tn-gym .lg{font-style:italic;font-weight:800;} .tn-gym .lg b{color:#D9FF3B;}
+  .tn-gym h4{font-size:22px;font-weight:800;margin-top:14px;line-height:1.05;} .tn-gym h4 b{color:#D9FF3B;}
+  .tn-gym .pill{display:inline-block;margin-top:12px;background:#D9FF3B;color:#0F1115;font-size:8px;font-weight:800;padding:4px 10px;}
+  .tn-tattoo{background:#0C0A0A;color:#E8E2D6;font-family:Georgia,serif;}
+  .tn-tattoo .lg{letter-spacing:.22em;font-size:11px;}
+  .tn-tattoo .teye{font-family:var(--body);font-size:7px;letter-spacing:.2em;color:#B5232B;text-transform:uppercase;}
+  .tn-tattoo .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:12px;}
+  .tn-tattoo .grid div{aspect-ratio:3/4;border-radius:2px;}
+  .tn-tattoo .grid .a{background:linear-gradient(160deg,#2a2422,#0f0d0d);}
+  .tn-tattoo .grid .b{background:linear-gradient(160deg,#3a2a2b,#140e0e);}
+  .tn-tattoo .grid .c{background:linear-gradient(160deg,#262220,#0d0c0c);}
+  .tn-tattoo .grid .d{background:linear-gradient(160deg,#332624,#120f0f);}
+  .tn-bar{background:radial-gradient(circle at 75% 25%,rgba(216,162,74,.28),transparent 55%),#14110D;color:#EBE3D4;font-family:Georgia,serif;}
+  .tn-bar .lg{letter-spacing:.2em;}
+  .tn-bar .teye{font-family:var(--body);font-size:7px;letter-spacing:.22em;color:#D8A24A;}
+  .tn-bar h4{font-size:22px;font-weight:400;margin-top:16px;}
+  .tn-shop{background:#fff;color:#1A1A1A;font-family:system-ui,sans-serif;}
+  .tn-shop .lg{letter-spacing:.08em;}
+  .tn-shop .cart{font-size:7px;border:1px solid #1A1A1A;border-radius:99px;padding:2px 7px;}
+  .tn-shop .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:6px;}
+  .tn-shop .grid .it{aspect-ratio:1;border-radius:5px;}
+  .tn-shop .grid .a{background:linear-gradient(135deg,#f0ede8,#dcd6cc);}
+  .tn-shop .grid .b{background:linear-gradient(135deg,#e8eef0,#d2dde0);}
+  .tn-shop .grid .c{background:linear-gradient(135deg,#f0e8ec,#e0d2d8);}
+  .pcard .meta{padding:16px 18px 18px;}
+  .pcard .meta .cat{font-size:11px;color:var(--pine);font-family:var(--num);letter-spacing:.14em;text-transform:uppercase;font-weight:600;}
+  .pcard .meta h3{font-size:16px;margin:5px 0 8px;}
+  .pcard .meta .optline{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink);background:var(--pine-soft);border-radius:99px;padding:4px 11px;margin-bottom:12px;}
+  .pcard .meta .optline b{color:var(--pine);font-weight:700;}
+  .pcard .meta .view{display:inline-flex;align-items:center;gap:7px;font-family:var(--num);font-weight:600;font-size:13px;color:var(--amber);cursor:pointer;}
+  .pcard .meta .view::after{content:"→";}
+
+  /* handover / ownership */
+  .own-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  .own{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px;border-top:3px solid var(--pine);}
+  .own .ic{font-size:22px;margin-bottom:10px;}
+  .own h3{font-size:15px;margin-bottom:6px;}
+  .own p{font-size:13px;color:var(--muted);line-height:1.7;}
+  .cmp{overflow-x:auto;margin-top:6px;}
+  .cmp table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;}
+  .cmp th,.cmp td{padding:14px 18px;text-align:left;font-size:13.5px;border-bottom:1px solid var(--line);vertical-align:top;}
+  .cmp thead th{font-family:var(--disp);font-weight:700;font-size:13.5px;background:var(--paper2);}
+  .cmp thead th.hi{background:var(--pine);color:#fff;}
+  .cmp td.k{font-weight:700;color:var(--ink);white-space:nowrap;width:24%;}
+  .cmp td.hi{background:var(--pine-soft);color:var(--pine-d);font-weight:500;}
+  .cmp tbody tr:last-child td{border-bottom:none;}
+  .own-note{text-align:center;font-size:12px;color:var(--muted);margin-top:16px;}
+
+  /* process */
+  .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;counter-reset:s;}
+  .step{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px 18px;}
+  .step .no{counter-increment:s;font-family:var(--num);font-weight:700;font-size:13px;color:var(--amber);}
+  .step .no::before{content:"0" counter(s);}
+  .step h3{font-size:15px;margin:8px 0 6px;}
+  .step p{font-size:12.5px;color:var(--muted);line-height:1.7;}
+  .step .dur{font-size:11px;color:var(--pine);font-weight:700;margin-top:9px;font-family:var(--num);}
+
+  .faq{max-width:760px;margin:0 auto;}
+  .qitem{border-bottom:1px solid var(--line);}
+  .q{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 4px;cursor:pointer;font-family:var(--disp);font-weight:700;font-size:16px;}
+  .q .pm{font-family:var(--num);color:var(--pine);font-size:22px;transition:transform .2s;flex:0 0 auto;}
+  .qitem.open .pm{transform:rotate(45deg);}
+  .a{max-height:0;overflow:hidden;transition:max-height .28s ease;}
+  .a p{padding:0 4px 20px;color:var(--muted);font-size:14px;}
+
+  .tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  .tcard{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px;position:relative;}
+  .tcard .badge{font-size:10px;letter-spacing:.12em;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:2px 9px;position:absolute;top:16px;right:16px;}
+  .tcard .quote{font-size:14.5px;line-height:1.85;color:var(--ink);margin-bottom:16px;}
+  .tcard .who{display:flex;align-items:center;gap:11px;}
+  .tcard .av{width:38px;height:38px;border-radius:50%;background:var(--pine-soft);display:flex;align-items:center;justify-content:center;color:var(--pine);font-weight:700;font-family:var(--disp);}
+  .tcard .who .nm{font-size:13px;font-weight:700;}
+  .tcard .who .role{font-size:11.5px;color:var(--muted);}
+
+  .ctaband{background:linear-gradient(135deg,var(--pine) 0%,var(--pine-d) 100%);color:#fff;border-radius:24px;padding:54px;text-align:center;}
+  .ctaband h2{color:#fff;}
+  .ctaband p{color:rgba(255,255,255,.85);margin:14px auto 28px;max-width:46ch;}
+  .form{max-width:520px;margin:0 auto;display:grid;gap:12px;text-align:left;}
+  .form .f2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .form input,.form textarea{width:100%;font-family:var(--body);font-size:14px;padding:13px 15px;border-radius:11px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.10);color:#fff;}
+  .form input::placeholder,.form textarea::placeholder{color:rgba(255,255,255,.6);}
+  .form input:focus,.form textarea:focus{outline:2px solid var(--amber);background:rgba(255,255,255,.16);}
+  .form .btn{justify-content:center;}
+  .form-ok{color:#fff;font-size:14px;margin-top:6px;display:none;}
+
+  footer{padding:54px 0 40px;border-top:1px solid var(--line);}
+  .foot{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap;}
+  .foot .about{max-width:42ch;}
+  .foot .about .brand{margin-bottom:10px;}
+  .foot .about p{font-size:13px;color:var(--muted);}
+  .foot .cols{display:flex;gap:54px;}
+  .foot .col h4{font-size:12px;letter-spacing:.1em;color:var(--ink);margin-bottom:12px;font-family:var(--num);text-transform:uppercase;}
+  .foot .col a{display:block;font-size:13px;color:var(--muted);margin-bottom:9px;}
+  .foot .col a:hover{color:var(--ink);}
+  .legal{margin-top:34px;font-size:11.5px;color:var(--muted);}
+
+  /* scroll reveal (text flows in as you scroll) */
+  .rv{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1);}
+  .rv.in{opacity:1;transform:none;}
+  .rv.d1{transition-delay:.08s;} .rv.d2{transition-delay:.16s;} .rv.d3{transition-delay:.24s;}
+
+  @media (max-width:920px){
+    .hero-grid{grid-template-columns:1fr;gap:36px;}
+    .cards3{grid-template-columns:repeat(2,1fr);}
+    .est{grid-template-columns:1fr;}
+    .est-right{position:static;}
+    .tgrid{grid-template-columns:1fr 1fr;}
+    .steps{grid-template-columns:repeat(2,1fr);}
+    .own-grid{grid-template-columns:1fr;}
+  }
+  @media (max-width:640px){
+    .navlinks{display:none;}
+    .menu-toggle{display:block;}
+    section{padding:56px 0;}
+    .cards3,.tgrid,.steps{grid-template-columns:1fr;}
+    .form .f2{grid-template-columns:1fr;}
+    .ctaband{padding:36px 22px;}
+    .foot{flex-direction:column;}
+    .pcard{width:260px;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important;animation:none!important;}
+    html{scroll-behavior:auto;}
+    .rv{opacity:1;transform:none;}
+    .hero h1,.hero .sub,.hero .hero-cta,.hero .hero-trust{opacity:1!important;}
+    .hero h1 .hl::after{transform:scaleX(1)!important;}
+    .carousel{overflow-x:auto;} .track{animation:none;}
+  }
+</style>
+</head>
+<body>
+<div class="grain" aria-hidden="true"></div>
+
+<header>
+  <div class="wrap nav">
+    <div class="brand"><span class="dot"></span>FRAME</div>
+    <nav class="navlinks">
+      <a href="#who">こんな方へ</a>
+      <a href="#why">なぜ作る</a>
+      <a href="#price">料金</a>
+      <a href="#works">制作事例</a>
+      <a href="#own">お渡し</a>
+      <a href="#contact" class="btn btn-primary">無料で見積もる</a>
+    </nav>
+    <button class="menu-toggle" aria-label="メニュー">☰</button>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg" aria-hidden="true"><div class="aur a1"></div><div class="aur a2"></div><div class="aur a3"></div></div>
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">Web Production for Small Business</span>
+      <h1>ホームページ、<span class="hl">5万円から</span>。<br>最短1週間で公開。</h1>
+      <p class="sub">店舗・サロン・夜のお店のための制作サービス。必要なものだけを、わかりやすい料金で。難しい話はこちらで引き受けます。</p>
+      <div class="hero-cta">
+        <a href="#contact" class="btn btn-primary btn-arrow">無料で見積もる</a>
+        <a href="#price" class="btn btn-ghost">料金を見る</a>
+      </div>
+      <div class="hero-trust">
+        <span><span class="ck">✓</span>追加料金は事前にすべて提示</span>
+        <span><span class="ck">✓</span>スマホ対応は標準</span>
+        <span><span class="ck">✓</span>サイトもアカウントも全部あなたのもの</span>
+      </div>
+    </div>
+    <div class="pricecard rv">
+      <span class="tag">Simple Base</span>
+      <div class="big"><span class="yen">¥</span>50,000<span class="from">〜（税別）</span></div>
+      <div class="lead" style="font-size:13.5px;">この価格に含まれるもの</div>
+      <ul>
+        <li>5ページまで（トップ・お店紹介・メニュー・アクセス・お問い合わせ）</li>
+        <li>スマートフォン最適化</li>
+        <li>お問い合わせフォーム</li>
+        <li>Googleマップ・SNS連携</li>
+        <li>公開作業まで一式</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- WHO -->
+<section id="who" class="alt">
+  <div class="wrap">
+    <div class="section-head rv">
+      <span class="eyebrow">Who it's for</span>
+      <h2>こんな方に向いています</h2>
+      <p class="lead">小さく始めたい、けれど中途半端にはしたくない。そんな事業者のための制作です。</p>
+    </div>
+    <div class="cards3">
+      <div class="ucard rv"><div class="ic">🌃</div><h3>クラブ・バー・シーシャ</h3><p>世界観・イベント情報・予約をひとつに。Instagramの先の"自分の場所"を。</p></div>
+      <div class="ucard rv d1"><div class="ic">💇</div><h3>美容室・ネイル・サロン</h3><p>予約導線とメニュー、スタッフ紹介で、新規の指名につなげます。</p></div>
+      <div class="ucard rv d2"><div class="ic">🏋️</div><h3>パーソナルジム</h3><p>体験予約・料金・実績を見せ、問い合わせのハードルを下げます。</p></div>
+      <div class="ucard rv d3"><div class="ic">🖋️</div><h3>タトゥースタジオ</h3><p>作品ポートフォリオで世界観と信頼を伝え、指名を生みます。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY -->
+<section id="why">
+  <div class="wrap">
+    <div class="section-head rv">
+      <span class="eyebrow">Why a website</span>
+      <h2>Instagramだけでは、取りこぼす</h2>
+      <p class="lead">SNSは出会いの入口。でも「予約したい」「料金を知りたい」「ちゃんとした店か確かめたい」に答えるのは、自分の場所＝ホームページです。</p>
+    </div>
+    <div class="cards3 why">
+      <div class="ucard rv"><div class="ic">🏛️</div><h3>24時間、信頼される店構え</h3><p>「ちゃんとした店だ」と一目で伝わる。SNSだけより信用されます。</p></div>
+      <div class="ucard rv d1"><div class="ic">📩</div><h3>予約・問い合わせを逃さない</h3><p>営業時間外でも受付。電話対応の手間も減らせます。</p></div>
+      <div class="ucard rv d2"><div class="ic">🔍</div><h3>検索で見つけてもらう</h3><p>「地域＋業種」で探す人に、Googleやマップから届きます。</p></div>
+      <div class="ucard rv"><div class="ic">🎨</div><h3>世界観を、自分の言葉で</h3><p>テンプレ任せのSNSと違い、店の空気をそのまま表現できます。</p></div>
+      <div class="ucard rv d1"><div class="ic">🛡️</div><h3>SNS依存から抜ける</h3><p>凍結やアルゴリズム変更に左右されない、自分の"資産"になります。</p></div>
+      <div class="ucard rv d2"><div class="ic">🗂️</div><h3>情報をひとつに</h3><p>メニュー・料金・アクセス・営業時間を集約し、DMの往復を減らします。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICE + LIVE PREVIEW -->
+<section id="price" class="alt">
+  <div class="wrap">
+    <div class="section-head rv">
+      <span class="eyebrow">Pricing &amp; Live Preview</span>
+      <h2>選ぶほどに、料金もイメージもその場で</h2>
+      <p class="lead">ベース5万円に、必要なオプションを足すだけ。右のプレビューが選んだ内容に合わせて変わり、合計もすぐ出ます。見えない追加費用はありません。</p>
+    </div>
+    <div class="est">
+      <div class="opt-list rv">
+        <div class="opt base">
+          <div class="l"><div class="cbx">✓</div><div><div class="nm">シンプルベース</div><div class="desc">5ページ・スマホ対応・問い合わせフォーム（必須）</div></div></div>
+          <div class="pr">¥50,000</div>
+        </div>
+        <div class="opt" data-price="5000" data-feat="pages"><div class="l"><div class="cbx"></div><div><div class="nm">ページ追加</div><div class="desc">ギャラリーやブログなど（1ページ）</div></div></div><div class="pr">+¥5,000</div></div>
+        <div class="opt" data-price="30000" data-feat="booking"><div class="l"><div class="cbx"></div><div><div class="nm">予約フォーム・カレンダー連携</div><div class="desc">日時指定の受付に</div></div></div><div class="pr">+¥30,000</div></div>
+        <div class="opt" data-price="80000" data-feat="3d"><div class="l"><div class="cbx"></div><div><div class="nm">3Dアニメーション導入</div><div class="desc">トップに動きと立体感を</div></div></div><div class="pr">+¥80,000〜</div></div>
+        <div class="opt" data-price="60000" data-feat="ec"><div class="l"><div class="cbx"></div><div><div class="nm">EC・オンライン決済</div><div class="desc">商品販売・カート機能</div></div></div><div class="pr">+¥60,000</div></div>
+        <div class="opt" data-price="40000" data-feat="lang"><div class="l"><div class="cbx"></div><div><div class="nm">多言語対応</div><div class="desc">英語など1言語追加</div></div></div><div class="pr">+¥40,000</div></div>
+        <div class="opt" data-price="50000" data-feat="logo"><div class="l"><div class="cbx"></div><div><div class="nm">ロゴ・ブランド一式</div><div class="desc">ロゴ＋配色＋フォント設計</div></div></div><div class="pr">+¥50,000</div></div>
+      </div>
+
+      <div class="est-right">
+        <div class="pv" id="pv" aria-label="プレビュー">
+          <div class="pv-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="pv-url">https://yourshop.com</span></div>
+          <div class="pv-screen">
+            <div class="pv-nav">
+              <div class="pv-logo"><span class="mk">◆</span>YOUR SHOP</div>
+              <div class="pv-right">
+                <div class="pv-menu">
+                  <span><span class="jp">ホーム</span><span class="en">Home</span></span>
+                  <span><span class="jp">メニュー</span><span class="en">Menu</span></span>
+                  <span class="pv-extra"><span class="jp">ギャラリー</span><span class="en">Gallery</span></span>
+                  <span><span class="jp">アクセス</span><span class="en">Access</span></span>
+                </div>
+                <span class="pv-cart">🛒<span class="cnt">2</span></span>
+                <span class="pv-lang"><b class="on">JP</b><b>EN</b></span>
+              </div>
+            </div>
+            <div class="pv-hero">
+              <div class="img-dots"></div>
+              <div class="pv-3d"><div class="cube"><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+              <span class="pv-badge">◆ 3D ANIMATION</span>
+              <div class="htxt"><div class="h">あなたのお店</div><div class="s">こだわりを、そのまま伝えるサイト。</div><span class="b">詳しく見る →</span></div>
+            </div>
+
+            <div class="pv-block pv-gallery"><div class="ttl">ギャラリー</div><div class="row"><span></span><span></span><span></span><span></span></div></div>
+
+            <div class="pv-block pv-booking">
+              <div class="ttl">ご予約</div>
+              <div class="dates"><span>水</span><span class="sel">木</span><span>金</span><span>土</span><span>日</span></div>
+              <div class="slots"><span>11:00</span><span>13:00</span><span class="x">15:00</span><span>17:00</span></div>
+              <div class="bk">この日時で予約する</div>
+            </div>
+
+            <div class="pv-block pv-shop">
+              <div class="it"><div class="ph"></div><div class="nm">商品A</div><div class="pr">¥3,200</div><div class="add">カートに入れる</div></div>
+              <div class="it"><div class="ph"></div><div class="nm">商品B</div><div class="pr">¥2,400</div><div class="add">カートに入れる</div></div>
+              <div class="it"><div class="ph"></div><div class="nm">商品C</div><div class="pr">¥4,600</div><div class="add">カートに入れる</div></div>
+            </div>
+
+            <div class="pv-foot"><div class="ln"></div><div class="ln s"></div><div class="ln"></div></div>
+          </div>
+        </div>
+        <div class="est-total rv">
+          <div class="row"><span>お見積り目安（一括）</span><span id="oneLabel">¥50,000</span></div>
+          <div class="row grand"><span>合計</span></div>
+          <div class="big"><span class="n" id="grand">50,000</span><span class="yen">円〜</span></div>
+          <a href="#contact" class="btn btn-primary btn-arrow">この内容で相談する</a>
+          <p class="est-note">※ 表示は仮の参考価格・イメージです。内容により変動します。正式なお見積りは無料で個別にご提示します。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WORKS (carousel) -->
+<section id="works">
+  <div class="wrap">
+    <div class="section-head rv">
+      <span class="eyebrow">Selected Works</span>
+      <h2>制作事例</h2>
+      <p class="lead">業態ごとのデモを掲載しています。各サイトはあなたのお店の雰囲気に合わせて作ります。（実績が出たら順次差し替え）</p>
+    </div>
+  </div>
+  <div class="carousel">
+    <button class="car-btn prev" aria-label="前のデモ">‹</button>
+    <button class="car-btn next" aria-label="次のデモ">›</button>
+    <div class="track" id="track">
+
+      <div class="pcard">
+        <div class="thumb"><span class="demo-pill">DEMO</span>
+          <div class="tn tn-salon">
+            <div class="bar"><span class="lg">LUCE hair</span><span class="nv"><span class="sg"></span></span></div>
+            <h4>髪を整える、<br>静かな時間を。</h4>
+            <span class="pill">24時間ネット予約</span>
+          </div>
+        </div>
+        <div class="meta">
+          <div class="cat">美容室・サロン</div>
+          <h3>予約できるサロンサイト</h3>
+          <div class="optline">見せる：<b>予約フォーム</b></div><br>
+          <a class="view">デモを見る</a>
+        </div>
+      </div>
+
+      <div class="pcard">
+        <div class="thumb"><span class="demo-pill">DEMO</span>
+          <div class="tn tn-gym">
+            <div class="bar"><span class="lg">FORGE<b>.</b></span><span class="nv"><span>料金</span><span>実績</span></span></div>
+            <h4>30日で、<br><b>体を変える。</b></h4>
+            <span class="pill">無料体験を予約</span>
+          </div>
+        </div>
+        <div class="meta">
+          <div class="cat">パーソナルジム</div>
+          <h3>体験予約を取るLP</h3>
+          <div class="optline">見せる：<b>問い合わせ導線</b></div><br>
+          <a class="view">デモを見る</a>
+        </div>
+      </div>
+
+      <div class="pcard">
+        <div class="thumb"><span class="demo-pill">DEMO</span>
+          <div class="tn tn-tattoo">
+            <div class="bar"><span class="lg">NOIR INK</span><span class="nv"><span>Works</span><span>Booking</span></span></div>
+            <div class="teye">Tokyo Tattoo Studio</div>
+            <div class="grid"><div class="a"></div><div class="b"></div><div class="c"></div><div class="d"></div></div>
+          </div>
+        </div>
+        <div class="meta">
+          <div class="cat">タトゥースタジオ</div>
+          <h3>作品で魅せるギャラリー</h3>
+          <div class="optline">見せる：<b>作品ギャラリー</b></div><br>
+          <a class="view">デモを見る</a>
+        </div>
+      </div>
+
+      <div class="pcard">
+        <div class="thumb"><span class="demo-pill">DEMO</span>
+          <div class="tn tn-bar">
+            <div class="bar"><span class="lg">EMBER</span><span class="nv"><span>MENU</span><span>EVENT</span></span></div>
+            <div class="teye">LOUNGE &amp; BAR</div>
+            <h4>夜を、深く。</h4>
+          </div>
+        </div>
+        <div class="meta">
+          <div class="cat">バー・ラウンジ</div>
+          <h3>世界観で伝えるLP</h3>
+          <div class="optline">見せる：<b>世界観・イベント</b></div><br>
+          <a class="view">デモを見る</a>
+        </div>
+      </div>
+
+      <div class="pcard">
+        <div class="thumb"><span class="demo-pill">DEMO</span>
+          <div class="tn tn-shop">
+            <div class="bar"><span class="lg">KINOWA</span><span class="cart">🛒 カート</span></div>
+            <div class="grid"><div class="it a"></div><div class="it b"></div><div class="it c"></div></div>
+          </div>
+        </div>
+        <div class="meta">
+          <div class="cat">物販・ショップ</div>
+          <h3>売れるECサイト</h3>
+          <div class="optline">見せる：<b>EC・決済</b></div><br>
+          <a class="view">デモを見る</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="wrap"><p class="lead" style="margin-top:24px;font-size:12.5px;">※ 各カードは「業態」と「見せられる有料オプション」を兼ねています。クリックすると本物のデモサイトが開きます（実績が出たら実例に差し替え）。</p></div>
+</section>
+
+<!-- FLOW -->
+<section id="flow" class="alt">
+  <div class="wrap">
+    <div class="section-head rv">
+      <span class="eyebrow">How it works</span>
+      <h2>納品までの流れ</h2>
+      <p class="lead">最短1週間。やり取りはチャットやメールで完結します。</p>
+    </div>
+    <div class="steps">
+      <div class="step rv"><div class="no"></div><h3>ヒアリング</h3><p>やりたいこと・予算をうかがい、無料でお見積り。</p><div class="dur">即日〜2日</div></div>
+      <div class="step rv d1"><div class="no"></div><h3>構成・デザイン案</h3><p>ページ構成とデザインの方向性をご提案。</p><div class="dur">2〜3日</div></div>
+      <div class="step rv d2"><div class="no"></div><h3>制作</h3><p>原稿・写真をもとに組み上げます。</p><div class="dur">3〜5日</div></div>
+      <div class="step rv d3"><div class="no"></div><h3>確認・修正</h3><p>実際の画面を見ながら調整。修正は2回まで無料。</p><div class="dur">1〜2日</div></div>
+      <div class="step rv d3"><div class="no"></div><h3>公開・お渡し</h3><p>あなた名義で公開し、すべてお渡しします。</p><div class="dur">即日</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- OWNERSHIP / HANDOVER -->
+<section id="own">
+  <div class="wrap">
+    <div class="section-head rv">
+      <span class="eyebrow">Yours to keep</span>
+      <h2>ぜんぶ、あなたのものに</h2>
+      <p class="lead">サイトもサーバーもドメインも、すべてあなた名義で構築してお渡しします。こちらが何かあっても、あなたのサイトは止まりません。</p>
+    </div>
+    <div class="own-grid">
+      <div class="own rv"><div class="ic">🔑</div><h3>名義はすべてあなた</h3><p>サーバー・ドメインはあなたのアカウントで取得。預かりません。</p></div>
+      <div class="own rv d1"><div class="ic">💸</div><h3>固定費なしの単発</h3><p>制作は一括で完結。毎月の支払いも、こちらへの依存もありません。</p></div>
+      <div class="own rv d2"><div class="ic">🚪</div><h3>ロックインなし</h3><p>他社へ移すのも自由。あなたの資産として、ずっと手元に残ります。</p></div>
+    </div>
+    <div class="cmp rv">
+      <table>
+        <thead><tr><th>サーバー・ドメイン</th><th>全部ご自身で</th><th class="hi">初期設定だけ代行（任意）</th></tr></thead>
+        <tbody>
+          <tr><td class="k">名義・所有</td><td>あなた</td><td class="hi">あなた（お渡し）</td></tr>
+          <tr><td class="k">最初の契約・設定</td><td>自分で調べて設定</td><td class="hi">あなた名義で代行</td></tr>
+          <tr><td class="k">公開後の管理</td><td>自分で</td><td class="hi">あなた（手順書つき）</td></tr>
+          <tr><td class="k">乗り換え・解約</td><td>自由</td><td class="hi">自由（ロックインなし）</td></tr>
+          <tr><td class="k">費用の目安</td><td>ドメイン ¥1,000〜2,000/年 ＋ サーバー ¥500〜1,500/月</td><td class="hi">初期設定の一回ぶんのみ（任意）</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="own-note rv">※ 費用は2026年時点の一般的な目安で、契約先により変わります。すでにお持ちのものはそのまま使えます。</p>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="alt">
+  <div class="wrap">
+    <div class="section-head rv" style="margin:0 auto 30px;text-align:center;">
+      <span class="eyebrow">FAQ</span>
+      <h2>よくある質問</h2>
+    </div>
+    <div class="faq">
+      <div class="qitem"><div class="q">納期はどのくらいですか？<span class="pm">+</span></div><div class="a"><p>内容によりますが、シンプルなサイトなら原稿が揃ってから最短1週間で公開できます。オプションが多い場合は事前に目安をお伝えします。</p></div></div>
+      <div class="qitem"><div class="q">修正は何回までできますか？<span class="pm">+</span></div><div class="a"><p>公開前の修正は2回まで無料です。それ以降や大幅な作り直しは、内容に応じて別途お見積りします。</p></div></div>
+      <div class="qitem"><div class="q">公開後に自分で更新できますか？<span class="pm">+</span></div><div class="a"><p>はい。簡単な文章や写真の差し替えはご自身でできるよう、手順書つきでお渡しします。手が回らないときはスポットで更新を承ります。</p></div></div>
+      <div class="qitem"><div class="q">サーバーやドメインは誰のものになりますか？<span class="pm">+</span></div><div class="a"><p>すべてあなた名義です。こちらで預かることはありません。最初の取得・設定だけ代行することもできます（任意）。</p></div></div>
+      <div class="qitem"><div class="q">支払い方法は？<span class="pm">+</span></div><div class="a"><p>銀行振込に対応しています。着手金と納品時のお支払いに分けることも可能です。</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section>
+  <div class="wrap">
+    <div class="section-head rv">
+      <span class="eyebrow">Voices</span>
+      <h2>お客様の声</h2>
+      <p class="lead">※ 下は掲載イメージのダミーです。実際の声に順次差し替えます。</p>
+    </div>
+    <div class="tgrid">
+      <div class="tcard rv"><span class="badge">掲載例</span><p class="quote">「何を用意すればいいか分からなかったのに、必要なものだけ整理してくれて、予算内で想像以上のものができました。」</p><div class="who"><div class="av">K</div><div><div class="nm">K様</div><div class="role">バー経営</div></div></div></div>
+      <div class="tcard rv d1"><span class="badge">掲載例</span><p class="quote">「予約フォームを入れてから電話対応が減って、本当に楽になりました。スマホでも綺麗に見えるのが嬉しい。」</p><div class="who"><div class="av">M</div><div><div class="nm">M様</div><div class="role">ヘアサロン</div></div></div></div>
+      <div class="tcard rv d2"><span class="badge">掲載例</span><p class="quote">「ドメインも全部こっちの名義にしてくれて安心。やり取りもチャットで完結して、忙しくても進められました。」</p><div class="who"><div class="av">T</div><div><div class="nm">T様</div><div class="role">パーソナルジム</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="wrap">
+    <div class="ctaband rv">
+      <h2>まずは、無料で見積もりを。</h2>
+      <p>「これは作れる？」「いくらかかる？」だけでも大丈夫です。内容をうかがって、最適なかたちと金額をお返しします。</p>
+      <div class="form">
+        <div class="f2">
+          <input type="text" placeholder="お名前 / 屋号" aria-label="お名前">
+          <input type="email" placeholder="メールアドレス" aria-label="メールアドレス">
+        </div>
+        <textarea rows="3" placeholder="やりたいこと・気になっていること（例：バーのサイトを予約付きで）" aria-label="ご相談内容"></textarea>
+        <button class="btn btn-primary btn-arrow" id="sendBtn">無料で見積もりを依頼</button>
+        <div class="form-ok" id="formOk">✓ ありがとうございます。内容を確認し、ご連絡します。（※これは仮の動作です）</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <div class="about">
+      <div class="brand"><span class="dot"></span>FRAME</div>
+      <p>小さな事業のためのホームページ制作。必要なものだけを、わかりやすい料金で、速くお届けします。サイトはすべてあなたのものに。</p>
+    </div>
+    <div class="cols">
+      <div class="col"><h4>サービス</h4><a href="#price">料金・プレビュー</a><a href="#works">制作事例</a><a href="#flow">納品の流れ</a></div>
+      <div class="col"><h4>その他</h4><a href="#own">お渡しについて</a><a href="#faq">よくある質問</a><a href="#contact">お問い合わせ</a></div>
+    </div>
+  </div>
+  <div class="wrap"><div class="legal">© 2026 FRAME（仮ブランド名）. すべての価格・事例は仮置きです。</div></div>
+</footer>
+
+<script>
+  // ---- estimator + live preview ----
+  const pv=document.getElementById('pv');
+  const opts=[...document.querySelectorAll('.opt[data-price]')];
+  const grand=document.getElementById('grand');
+  const oneLabel=document.getElementById('oneLabel');
+  const BASE=50000;
+  const fmt=n=>n.toLocaleString('ja-JP');
+  function recalc(){
+    let one=BASE;
+    opts.forEach(o=>{ if(o.classList.contains('on')) one+=+o.dataset.price; });
+    oneLabel.textContent='¥'+fmt(one);
+    grand.textContent=fmt(one);
+  }
+  opts.forEach(o=>{
+    o.addEventListener('click',()=>{
+      const on=o.classList.toggle('on');
+      o.querySelector('.cbx').textContent=on?'✓':'';
+      if(o.dataset.feat) pv.classList.toggle('has-'+o.dataset.feat,on);
+      recalc();
+    });
+  });
+
+  // ---- portfolio carousel (manual: arrows / drag / scroll, + gentle autoplay that yields to the user) ----
+  const track=document.getElementById('track');
+  const carPrev=document.querySelector('.car-btn.prev');
+  const carNext=document.querySelector('.car-btn.next');
+  const stepW=()=>{const c=track.querySelector('.pcard');return c?c.offsetWidth+22:342;};
+  let userStopped=false, hovering=false;
+  const stopAuto=()=>{userStopped=true;};
+  carPrev.addEventListener('click',()=>{stopAuto();track.scrollBy({left:-stepW(),behavior:'smooth'});});
+  carNext.addEventListener('click',()=>{stopAuto();track.scrollBy({left:stepW(),behavior:'smooth'});});
+  track.addEventListener('wheel',stopAuto,{passive:true});
+  track.addEventListener('mouseenter',()=>hovering=true);
+  track.addEventListener('mouseleave',()=>hovering=false);
+  // drag to scroll
+  let down=false,sx=0,sl=0,moved=false;
+  track.addEventListener('pointerdown',e=>{down=true;moved=false;sx=e.pageX;sl=track.scrollLeft;track.classList.add('dragging');});
+  track.addEventListener('pointermove',e=>{if(!down)return;const dx=e.pageX-sx;if(Math.abs(dx)>4){moved=true;stopAuto();}track.scrollLeft=sl-dx;});
+  const endDrag=()=>{if(down){down=false;track.classList.remove('dragging');}};
+  window.addEventListener('pointerup',endDrag);
+  window.addEventListener('pointercancel',endDrag);
+  track.querySelectorAll('.view').forEach(v=>v.addEventListener('click',e=>{if(moved)e.preventDefault();}));
+  // gentle autoplay — pauses on hover, stops on any manual interaction, off for reduced-motion
+  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    setInterval(()=>{
+      if(userStopped||hovering)return;
+      const max=track.scrollWidth-track.clientWidth;
+      if(track.scrollLeft>=max-6){track.scrollTo({left:0,behavior:'smooth'});}
+      else{track.scrollBy({left:stepW(),behavior:'smooth'});}
+    },3800);
+  }
+
+  // ---- faq ----
+  document.querySelectorAll('.qitem').forEach(item=>{
+    const q=item.querySelector('.q');const a=item.querySelector('.a');
+    q.addEventListener('click',()=>{
+      const open=item.classList.contains('open');
+      document.querySelectorAll('.qitem').forEach(i=>{i.classList.remove('open');i.querySelector('.a').style.maxHeight=null;});
+      if(!open){item.classList.add('open');a.style.maxHeight=a.scrollHeight+'px';}
+    });
+  });
+
+  // ---- contact (mock) ----
+  document.getElementById('sendBtn').addEventListener('click',()=>{document.getElementById('formOk').style.display='block';});
+
+  // ---- scroll reveal ----
+  const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.12});
+  document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+
+  // ---- mobile menu fallback ----
+  document.querySelector('.menu-toggle').addEventListener('click',()=>{document.getElementById('price').scrollIntoView();});
+</script>
+</body>
+</html>
